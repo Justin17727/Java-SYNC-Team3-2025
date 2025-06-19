@@ -1,0 +1,68 @@
+#waterPane {
+    -fx-background-color: white;
+    -fx-background-radius: 10;
+    -fx-effect: dropshadow(three-pass-box, rgba(0,0,0,0.3), 10, 0, 0, 4);
+    -fx-alignment: center;
+    -fx-font-size: 20px;
+    -fx-text-fill: white;
+}
+#waterPane:hover {
+    -fx-effect: dropshadow(three-pass-box, rgba(0,0,255,0.3), 10, 0, 0, 4);
+}
+#posturePane {
+    -fx-background-color: white;
+    -fx-background-radius: 10;
+    -fx-effect: dropshadow(three-pass-box, rgba(0,0,0,0.3), 10, 0, 0, 4);
+    -fx-alignment: center;
+    -fx-font-size: 20px;
+    -fx-text-fill: white;
+}
+#posturePane:hover {
+    -fx-effect: dropshadow(three-pass-box, rgba(0,255,0,0.3), 10, 0, 0, 4);
+}
+#sightPane {
+    -fx-background-color: white;
+    -fx-background-radius: 10;
+    -fx-effect: dropshadow(three-pass-box, rgba(0,0,0,0.3), 10, 0, 0, 4);
+    -fx-alignment: center;
+    -fx-font-size: 20px;
+    -fx-text-fill: white;
+}
+#sightPane:hover {
+    -fx-effect: dropshadow(three-pass-box, rgba(255,0,0,0.3), 10, 0, 0, 4);
+}
+#dash {
+    -fx-background-color: white;
+    -fx-background-radius: 10;
+    -fx-effect: dropshadow(three-pass-box, rgba(0,0,0,0.3), 10, 0, 0, 4);
+    -fx-alignment: center;
+    -fx-font-size: 20px;
+    -fx-text-fill: white;
+}
+#dash:hover {
+    -fx-effect: dropshadow(three-pass-box, rgba(0, 255, 255, 0.3), 10, 0, 0, 4);
+}
+.chart {
+    -fx-background-color: transparent;
+    -fx-padding: 20;
+}
+.chart-plot-background {
+    -fx-background-color: transparent;
+}
+.default-color0.chart-series-area-line {
+    -fx-stroke: #1E88E5;
+    -fx-stroke-width: 3px;
+}
+.default-color0.chart-series-area-fill {
+    -fx-fill: linear-gradient(to top, rgba(30, 136, 229, 0.3), transparent);
+}
+.default-color1.chart-series-area-line {
+    -fx-stroke: #43A047;
+    -fx-stroke-width: 3px;
+}
+.default-color1.chart-series-area-fill {
+    -fx-fill: linear-gradient(to top, rgba(67, 160, 71, 0.3), transparent);
+}
+.chart-line-symbol {
+    -fx-background-color: transparent;
+}
