@@ -1,22 +1,26 @@
 import javafx.application.Application;
+import javafx.beans.value.ChangeListener;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.Scene;
 import javafx.scene.chart.*;
-import javafx.scene.control.CheckBox;
-import javafx.scene.control.Label;
-import javafx.scene.control.ToggleButton;
-import javafx.scene.control.ToggleGroup;
+import javafx.scene.control.*;
 import javafx.scene.image.Image;
 import javafx.scene.layout.*;
 import javafx.scene.paint.Color;
 import javafx.scene.shape.Line;
-import javafx.scene.text.Font;
 import javafx.scene.text.Text;
 import javafx.stage.Stage;
 
 public class Main extends Application {
     private StackPane dashBoard;
+    private CheckBox waterTask, stretchTask, restTask;
+    private Button confirmBtn;
+    private String currentStat = "Hydration";
+    private int currentRange = 7;
+
+    private StackPane waterPane, posturePane, sightPane;
+    private AnchorPane root;
 
     private AreaChart<Number, Number> createChart(String title, String color, int[] x, double[] y) {
         NumberAxis xAxis = new NumberAxis();
@@ -48,21 +52,73 @@ public class Main extends Application {
     }
 
     private void switchChart(String stat) {
+        currentStat = stat;
+        updateChart();
+    }
+
+    private void updateChart() {
         dashBoard.getChildren().clear();
-        switch (stat) {
-            case "Hydration" -> dashBoard.getChildren().add(createChart("Hydration", "#1E88E5", new int[]{1,2,3,4,5}, new double[]{1,1.5,1.2,1.3,2}));
-            case "Posture" -> dashBoard.getChildren().add(createChart("Posture", "#43A047", new int[]{1,2,3,4,5}, new double[]{10,12,15,8,9}));
-            case "Steps" -> dashBoard.getChildren().add(createChart("Steps", "#FB8C00", new int[]{1,2,3,4,5}, new double[]{3000,3200,2900,2300,2400}));
-        }
+        double[] y = DatabaseHelper.getLastNValues(currentStat, currentRange);
+        int[] x = new int[y.length];
+        for (int i = 0; i < x.length; i++) x[i] = i + 1;
+        dashBoard.getChildren().add(createChart(currentStat, getColor(currentStat), x, y));
+    }
+
+    private String getColor(String stat) {
+        return switch (stat) {
+            case "Hydration" -> "#1E88E5";
+            case "Posture" -> "#43A047";
+            case "Steps" -> "#FB8C00";
+            default -> "#000000";
+        };
+    }
+
+    private StackPane wrapWithProgress(StackPane pane, String name, double progress, String color) {
+        ProgressIndicator circle = new ProgressIndicator(progress);
+        circle.setStyle("-fx-progress-color: " + color);
+        circle.setPrefSize(150, 150);
+        StackPane infoPane = new StackPane(circle, pane);
+        infoPane.setId(name);
+        infoPane.setMaxSize(130, 130);
+        infoPane.setMinSize(130, 130);
+        return infoPane;
+    }
+
+    private void refreshProgressRings() {
+        StackPane newWaterPane = wrapWithProgress(createInfoPane("Hydration", "waterPane"),
+                "waterPane", DatabaseHelper.getDailyProgress("Hydration"), "#1E88E5");
+        StackPane newPosturePane = wrapWithProgress(createInfoPane("Posture", "posturePane"),
+                "posturePane", DatabaseHelper.getDailyProgress("Posture"), "#43A047");
+        StackPane newSightPane = wrapWithProgress(createInfoPane("Rest", "sightPane"),
+                "sightPane", DatabaseHelper.getDailyProgress("Steps"), "#E53935");
+
+        AnchorPane.setTopAnchor(newWaterPane, 20.0);
+        AnchorPane.setLeftAnchor(newWaterPane, 500.0);
+        AnchorPane.setTopAnchor(newPosturePane, 20.0);
+        AnchorPane.setLeftAnchor(newPosturePane, 650.0);
+        AnchorPane.setTopAnchor(newSightPane, 20.0);
+        AnchorPane.setLeftAnchor(newSightPane, 800.0);
+
+        root.getChildren().removeAll(waterPane, posturePane, sightPane);
+        root.getChildren().addAll(newWaterPane, newPosturePane, newSightPane);
+
+        waterPane = newWaterPane;
+        posturePane = newPosturePane;
+        sightPane = newSightPane;
     }
 
     @Override
     public void start(Stage stage) {
-        AnchorPane root = new AnchorPane();
+        DatabaseHelper.initializeTables();
 
-        StackPane waterPane = createInfoPane("Hydration", "waterPane");
-        StackPane posturePane = createInfoPane("Posture", "posturePane");
-        StackPane sightPane = createInfoPane("Rest", "sightPane");
+        root = new AnchorPane();
+
+        waterPane = wrapWithProgress(createInfoPane("Hydration", "waterPane"),
+                "waterPane", DatabaseHelper.getDailyProgress("Hydration"), "#1E88E5");
+        posturePane = wrapWithProgress(createInfoPane("Posture", "posturePane"),
+                "posturePane", DatabaseHelper.getDailyProgress("Posture"), "#43A047");
+        sightPane = wrapWithProgress(createInfoPane("Rest", "sightPane"),
+                "sightPane", DatabaseHelper.getDailyProgress("Steps"), "#E53935");
 
         AnchorPane.setTopAnchor(waterPane, 20.0);
         AnchorPane.setLeftAnchor(waterPane, 500.0);
@@ -90,7 +146,7 @@ public class Main extends Application {
         dashBoard = new StackPane();
         dashBoard.setId("dash");
         dashBoard.setPrefSize(930, 300);
-        dashBoard.getChildren().add(createChart("Hydration", "#1E88E5", new int[]{1,2,3,4,5}, new double[]{1,1.5,1.2,1.3,2}));
+        updateChart();
         AnchorPane.setTopAnchor(dashBoard, 230.0);
         AnchorPane.setLeftAnchor(dashBoard, 30.0);
 
@@ -100,19 +156,44 @@ public class Main extends Application {
 
         StackPane reminderList = new StackPane();
         reminderList.setId("reminder");
-        reminderList.setPrefSize(400, 200);
+        reminderList.setMaxSize(400, 200);
+        reminderList.setMinSize(400, 200);
 
         AnchorPane.setLeftAnchor(reminderList, 30.0);
         AnchorPane.setTopAnchor(reminderList, 20.0);
 
         Text reminder = new Text("Daily Reminder");
-        CheckBox waterTask = new CheckBox("Drink Water");
-        CheckBox stretchTask = new CheckBox("Stretch for 5 minutes");
-        CheckBox restTask = new CheckBox("10 minute break");
+        waterTask = new CheckBox("Drink Water");
+        stretchTask = new CheckBox("Stretch for 5 minutes");
+        restTask = new CheckBox("10 minute break");
+
+        confirmBtn = new Button("Confirm");
+        confirmBtn.setDisable(true);
+        confirmBtn.setPrefSize(120, 30);
+        confirmBtn.setOnAction(e -> {
+            boolean didWater = waterTask.isSelected();
+            boolean didStretch = stretchTask.isSelected();
+            boolean didRest = restTask.isSelected();
+
+            DatabaseHelper.saveReminders(didWater, didStretch, didRest);
+
+            if (didWater) DatabaseHelper.incrementValue("Hydration", 250);
+            if (didStretch) DatabaseHelper.incrementValue("Posture", 1);
+            if (didRest) DatabaseHelper.incrementValue("Steps", 100);
+
+            updateChart();
+            refreshProgressRings();
+        });
+
+        ChangeListener<Boolean> changeListener = (obs, oldVal, newVal) -> {
+            confirmBtn.setDisable(!(waterTask.isSelected() || stretchTask.isSelected() || restTask.isSelected()));
+        };
+        waterTask.selectedProperty().addListener(changeListener);
+        stretchTask.selectedProperty().addListener(changeListener);
+        restTask.selectedProperty().addListener(changeListener);
 
         AnchorPane reminderListPane = new AnchorPane();
-
-        AnchorPane.setTopAnchor(reminder, 20.0);
+        AnchorPane.setTopAnchor(reminder, 10.0);
         AnchorPane.setLeftAnchor(reminder, 50.0);
         AnchorPane.setTopAnchor(waterTask, 50.0);
         AnchorPane.setLeftAnchor(waterTask, 50.0);
@@ -120,15 +201,29 @@ public class Main extends Application {
         AnchorPane.setLeftAnchor(stretchTask, 50.0);
         AnchorPane.setTopAnchor(restTask, 130.0);
         AnchorPane.setLeftAnchor(restTask, 50.0);
+        AnchorPane.setTopAnchor(confirmBtn, 150.0);
+        AnchorPane.setLeftAnchor(confirmBtn, 140.0);
 
-        reminderListPane.getChildren().addAll(reminder, waterTask, stretchTask, restTask);
+        reminderListPane.getChildren().addAll(reminder, waterTask, stretchTask, restTask, confirmBtn);
         reminderList.getChildren().add(reminderListPane);
 
         Line line = new Line(450, 20, 450, 200);
         line.setStrokeWidth(2);
         line.setStroke(Color.BLACK);
 
-        root.getChildren().addAll(waterPane, posturePane, sightPane, toggleBar, line, dashBoard, reminderList);
+        Button dayBtn = new Button("Week");
+        Button monthBtn = new Button("Month");
+        Button yearBtn = new Button("Year");
+        dayBtn.setOnAction(e -> { currentRange = 7; updateChart(); });
+        monthBtn.setOnAction(e -> { currentRange = 30; updateChart(); });
+        yearBtn.setOnAction(e -> { currentRange = 365; updateChart(); });
+
+        HBox timeButtons = new HBox(10, dayBtn, monthBtn, yearBtn);
+        timeButtons.setAlignment(Pos.CENTER);
+        AnchorPane.setTopAnchor(timeButtons, 160.0);
+        AnchorPane.setLeftAnchor(timeButtons, 500.0);
+
+        root.getChildren().addAll(waterPane, posturePane, sightPane, toggleBar, line, dashBoard, reminderList, timeButtons);
 
         Scene scene = new Scene(root, 1000, 600);
         scene.getStylesheets().add(getClass().getResource("/style.css").toExternalForm());
@@ -142,9 +237,13 @@ public class Main extends Application {
 
     private StackPane createInfoPane(String text, String id) {
         Label label = new Label(text);
-        StackPane pane = new StackPane(label);
+        label.setStyle("-fx-font-size: 14px; -fx-text-fill: black;");
+        VBox box = new VBox(label);
+        box.setAlignment(Pos.CENTER);
+        StackPane pane = new StackPane(box);
         pane.setId(id);
-        pane.setPrefSize(120, 120);
+        pane.setPrefSize(100, 100);
+        pane.setStyle("-fx-background-color: transparent;");
         return pane;
     }
 
