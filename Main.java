@@ -11,6 +11,7 @@ import javafx.scene.paint.Color;
 import javafx.scene.shape.Line;
 import javafx.scene.text.Text;
 import javafx.stage.Stage;
+import javafx.scene.input.MouseEvent;
 
 public class Main extends Application {
     private StackPane dashBoard;
@@ -137,6 +138,22 @@ public class Main extends Application {
         stepsBtn.setToggleGroup(group);
         waterBtn.setSelected(true);
 
+        waterBtn.addEventFilter(MouseEvent.MOUSE_PRESSED, e -> {
+            if(waterBtn.isSelected()) {
+                e.consume();
+            }
+        });
+        postureBtn.addEventFilter(MouseEvent.MOUSE_PRESSED, e -> {
+            if(postureBtn.isSelected()) {
+                e.consume();
+            }
+        });
+        stepsBtn.addEventFilter(MouseEvent.MOUSE_PRESSED, e -> {
+            if(stepsBtn.isSelected()) {
+                e.consume();
+            }
+        });
+
         HBox toggleBar = new HBox(10, waterBtn, postureBtn, stepsBtn);
         toggleBar.setAlignment(Pos.CENTER);
         toggleBar.setPadding(new Insets(20));
@@ -164,10 +181,20 @@ public class Main extends Application {
 
         Text reminder = new Text("Daily Reminder");
         waterTask = new CheckBox("Drink Water");
+        waterTask.setId("restTask");
+        waterTask.setMaxSize(250, 5);
+        waterTask.setMinSize(250, 5);
         stretchTask = new CheckBox("Stretch for 5 minutes");
-        restTask = new CheckBox("10 minute break");
+        stretchTask.setId("restTask");
+        stretchTask.setMaxSize(250, 5);
+        stretchTask.setMinSize(250, 5);
+        restTask = new CheckBox("10 minute break/walk");
+        restTask.setId("restTask");
+        restTask.setMaxSize(250, 5);
+        restTask.setMinSize(250, 5);
 
         confirmBtn = new Button("Confirm");
+        confirmBtn.setId("confirm");
         confirmBtn.setDisable(true);
         confirmBtn.setPrefSize(120, 30);
         confirmBtn.setOnAction(e -> {
@@ -177,9 +204,18 @@ public class Main extends Application {
 
             DatabaseHelper.saveReminders(didWater, didStretch, didRest);
 
-            if (didWater) DatabaseHelper.incrementValue("Hydration", 250);
-            if (didStretch) DatabaseHelper.incrementValue("Posture", 1);
-            if (didRest) DatabaseHelper.incrementValue("Steps", 100);
+            if (didWater) {
+                DatabaseHelper.incrementValue("Hydration", 250);
+                waterTask.setSelected(false);
+            }
+            if (didStretch) {
+                DatabaseHelper.incrementValue("Posture", 1);
+                stretchTask.setSelected(false);
+            }
+            if (didRest) {
+                DatabaseHelper.incrementValue("Steps", 500);
+                restTask.setSelected(false);
+            }
 
             updateChart();
             refreshProgressRings();
@@ -211,15 +247,38 @@ public class Main extends Application {
         line.setStrokeWidth(2);
         line.setStroke(Color.BLACK);
 
-        Button dayBtn = new Button("Week");
-        Button monthBtn = new Button("Month");
-        Button yearBtn = new Button("Year");
-        dayBtn.setOnAction(e -> { currentRange = 7; updateChart(); });
+        ToggleGroup timeButtonGroup = new ToggleGroup();
+        ToggleButton weekBtn = new ToggleButton("Week");
+        weekBtn.setSelected(true);
+        weekBtn.setToggleGroup(timeButtonGroup);
+        ToggleButton monthBtn = new ToggleButton("Month");
+        monthBtn.setToggleGroup(timeButtonGroup);
+        ToggleButton yearBtn = new ToggleButton("Year");
+        yearBtn.setToggleGroup(timeButtonGroup);
+
+        weekBtn.addEventFilter(MouseEvent.MOUSE_PRESSED, e -> {
+            if(weekBtn.isSelected()) {
+                e.consume();
+            }
+        });
+        monthBtn.addEventFilter(MouseEvent.MOUSE_PRESSED, e -> {
+            if(monthBtn.isSelected()) {
+                e.consume();
+            }
+        });
+        yearBtn.addEventFilter(MouseEvent.MOUSE_PRESSED, e -> {
+            if(yearBtn.isSelected()) {
+                e.consume();
+            }
+        });
+
+        weekBtn.setOnAction(e -> { currentRange = 7; updateChart(); });
         monthBtn.setOnAction(e -> { currentRange = 30; updateChart(); });
         yearBtn.setOnAction(e -> { currentRange = 365; updateChart(); });
 
-        HBox timeButtons = new HBox(10, dayBtn, monthBtn, yearBtn);
+        HBox timeButtons = new HBox(10, weekBtn, monthBtn, yearBtn);
         timeButtons.setAlignment(Pos.CENTER);
+        timeButtons.setPadding(new Insets(20));
         AnchorPane.setTopAnchor(timeButtons, 160.0);
         AnchorPane.setLeftAnchor(timeButtons, 500.0);
 

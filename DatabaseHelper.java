@@ -71,7 +71,7 @@ public class DatabaseHelper {
                 return switch (table) {
                     case "Hydration" -> Math.min(val / 2000.0, 1.0);
                     case "Posture" -> Math.min(val / 4.0, 1.0);
-                    case "Steps" -> Math.min(val / 6000.0, 1.0);
+                    case "Steps" -> Math.min(val / 2500.0, 1.0);
                     default -> 0;
                 };
             }
