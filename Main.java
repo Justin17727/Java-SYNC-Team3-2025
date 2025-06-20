@@ -3,6 +3,7 @@ import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.Scene;
 import javafx.scene.chart.*;
+import javafx.scene.control.CheckBox;
 import javafx.scene.control.Label;
 import javafx.scene.control.ToggleButton;
 import javafx.scene.control.ToggleGroup;
@@ -10,6 +11,8 @@ import javafx.scene.image.Image;
 import javafx.scene.layout.*;
 import javafx.scene.paint.Color;
 import javafx.scene.shape.Line;
+import javafx.scene.text.Font;
+import javafx.scene.text.Text;
 import javafx.stage.Stage;
 
 public class Main extends Application {
@@ -81,7 +84,7 @@ public class Main extends Application {
         HBox toggleBar = new HBox(10, waterBtn, postureBtn, stepsBtn);
         toggleBar.setAlignment(Pos.CENTER);
         toggleBar.setPadding(new Insets(20));
-        AnchorPane.setTopAnchor(toggleBar, 150.0);
+        AnchorPane.setBottomAnchor(toggleBar, 0.0);
         AnchorPane.setLeftAnchor(toggleBar, 30.0);
 
         dashBoard = new StackPane();
@@ -95,11 +98,37 @@ public class Main extends Application {
         postureBtn.setOnAction(e -> switchChart("Posture"));
         stepsBtn.setOnAction(e -> switchChart("Steps"));
 
+        StackPane reminderList = new StackPane();
+        reminderList.setId("reminder");
+        reminderList.setPrefSize(400, 200);
+
+        AnchorPane.setLeftAnchor(reminderList, 30.0);
+        AnchorPane.setTopAnchor(reminderList, 20.0);
+
+        Text reminder = new Text("Daily Reminder");
+        CheckBox waterTask = new CheckBox("Drink Water");
+        CheckBox stretchTask = new CheckBox("Stretch for 5 minutes");
+        CheckBox restTask = new CheckBox("10 minute break");
+
+        AnchorPane reminderListPane = new AnchorPane();
+
+        AnchorPane.setTopAnchor(reminder, 20.0);
+        AnchorPane.setLeftAnchor(reminder, 50.0);
+        AnchorPane.setTopAnchor(waterTask, 50.0);
+        AnchorPane.setLeftAnchor(waterTask, 50.0);
+        AnchorPane.setTopAnchor(stretchTask, 90.0);
+        AnchorPane.setLeftAnchor(stretchTask, 50.0);
+        AnchorPane.setTopAnchor(restTask, 130.0);
+        AnchorPane.setLeftAnchor(restTask, 50.0);
+
+        reminderListPane.getChildren().addAll(reminder, waterTask, stretchTask, restTask);
+        reminderList.getChildren().add(reminderListPane);
+
         Line line = new Line(450, 20, 450, 200);
         line.setStrokeWidth(2);
         line.setStroke(Color.BLACK);
 
-        root.getChildren().addAll(waterPane, posturePane, sightPane, toggleBar, line, dashBoard);
+        root.getChildren().addAll(waterPane, posturePane, sightPane, toggleBar, line, dashBoard, reminderList);
 
         Scene scene = new Scene(root, 1000, 600);
         scene.getStylesheets().add(getClass().getResource("/style.css").toExternalForm());
