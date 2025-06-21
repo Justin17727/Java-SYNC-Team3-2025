@@ -287,6 +287,8 @@ public class Main extends Application {
         Scene scene = new Scene(root, 1000, 600);
         scene.getStylesheets().add(getClass().getResource("/style.css").toExternalForm());
 
+        ReminderManager reminderManager = new ReminderManager(stage);
+
         stage.setTitle("Health Tracker");
         stage.getIcons().add(new Image("/icon.png"));
         stage.setScene(scene);
